@@ -1,0 +1,13 @@
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+    <!-- Purple background -->
+    <rect width="1024" height="1024" fill="#9C5BAF" />
+
+    <!-- White document icon -->
+    <circle cx="512" cy="512" r="307" fill="white" />
+
+    <!-- Purple lines representing text -->
+    <rect x="328" y="358" width="368" height="31" fill="#9C5BAF" rx="5" />
+    <rect x="328" y="440" width="368" height="31" fill="#9C5BAF" rx="5" />
+    <rect x="328" y="522" width="368" height="31" fill="#9C5BAF" rx="5" />
+    <rect x="328" y="604" width="368" height="31" fill="#9C5BAF" rx="5" />
+</svg>
