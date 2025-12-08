@@ -6,6 +6,7 @@ import '../../bloc/auth/auth_state.dart';
 import '../../bloc/resume/resume_bloc.dart';
 import '../../bloc/resume/resume_event.dart';
 import '../../bloc/resume/resume_state.dart';
+import '../../cubit/theme_cubit.dart';
 import '../resume/resume_list_screen.dart';
 import '../resume/create_resume_screen.dart';
 import '../auth/login_screen.dart';
@@ -37,6 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Resume Creator'),
         actions: [
+          BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, themeMode) {
+              return IconButton(
+                icon: Icon(
+                  themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : themeMode == ThemeMode.light
+                      ? Icons.dark_mode
+                      : Icons.brightness_auto,
+                ),
+                tooltip: 'Toggle theme',
+                onPressed: () {
+                  context.read<ThemeCubit>().toggleTheme();
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {

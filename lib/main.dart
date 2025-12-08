@@ -15,6 +15,7 @@ import 'presentation/bloc/auth/auth_bloc.dart';
 import 'presentation/bloc/auth/auth_event.dart';
 import 'presentation/bloc/auth/auth_state.dart';
 import 'presentation/bloc/resume/resume_bloc.dart';
+import 'presentation/cubit/theme_cubit.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/home/home_screen.dart';
 
@@ -61,26 +62,31 @@ class MyApp extends StatelessWidget {
                 AuthBloc(authRepository)..add(CheckAuthStatus()),
           ),
           BlocProvider(create: (context) => ResumeBloc(resumeRepository)),
+          BlocProvider(create: (context) => ThemeCubit()),
         ],
-        child: MaterialApp(
-          title: 'Resume Creator',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system, // Follows system theme
-          home: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading || state is AuthInitial) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              } else if (state is Authenticated) {
-                return const HomeScreen();
-              } else {
-                return const LoginScreen();
-              }
-            },
-          ),
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            return MaterialApp(
+              title: 'Resume Creator',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode, // Can now be toggled manually
+              home: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthLoading || state is AuthInitial) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (state is Authenticated) {
+                    return const HomeScreen();
+                  } else {
+                    return const LoginScreen();
+                  }
+                },
+              ),
+            );
+          },
         ),
       ),
     );
