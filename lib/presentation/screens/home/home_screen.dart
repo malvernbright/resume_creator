@@ -7,6 +7,7 @@ import '../../bloc/resume/resume_bloc.dart';
 import '../../bloc/resume/resume_event.dart';
 import '../../bloc/resume/resume_state.dart';
 import '../resume/resume_list_screen.dart';
+import '../resume/create_resume_screen.dart';
 import '../auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -82,8 +83,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to create resume screen
-          // Will be implemented with the full UI
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<ResumeBloc>(),
+                    child: const CreateResumeScreen(),
+                  ),
+                ),
+              )
+              .then((_) => _loadResumes());
         },
         icon: const Icon(Icons.add),
         label: const Text('New Resume'),
