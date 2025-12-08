@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/resume_entity.dart';
 import '../../../domain/entities/common_entities.dart';
+import '../../../core/enums/resume_template.dart';
 import '../../bloc/auth/auth_bloc.dart';
 import '../../bloc/auth/auth_state.dart';
 import '../../bloc/resume/resume_bloc.dart';
@@ -32,6 +33,9 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
   late final TextEditingController _linkedInController;
   late final TextEditingController _githubController;
   late final TextEditingController _summaryController;
+
+  // Template selection
+  ResumeTemplate _selectedTemplate = ResumeTemplate.classic;
 
   // Lists for complex fields
   List<Experience> _experiences = [];
@@ -187,6 +191,106 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 24),
+
+              // Template Selection
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Choose Template *',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ResumeTemplate.values.map((template) {
+                        final isSelected = _selectedTemplate == template;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTemplate = template;
+                            });
+                          },
+                          child: Container(
+                            width: (MediaQuery.of(context).size.width - 80) / 2,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer
+                                  : Colors.grey[100],
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.grey[300]!,
+                                width: isSelected ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isSelected
+                                          ? Icons.check_circle
+                                          : Icons.radio_button_unchecked,
+                                      color: isSelected
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.primary
+                                          : Colors.grey,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        template.displayName,
+                                        style: TextStyle(
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.w500,
+                                          color: isSelected
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  template.description,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -506,57 +610,96 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
     final degreeController = TextEditingController();
     final institutionController = TextEditingController();
     final fieldController = TextEditingController();
+    String educationLevel = 'Bachelor\'s Degree';
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Education'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: degreeController,
-              decoration: const InputDecoration(labelText: 'Degree'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Education'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: educationLevel,
+                  decoration: const InputDecoration(
+                    labelText: 'Education Level',
+                  ),
+                  items:
+                      [
+                            'High School',
+                            'Certificate',
+                            'Diploma',
+                            'Associate Degree',
+                            'Bachelor\'s Degree',
+                            'Master\'s Degree',
+                            'Doctorate (PhD)',
+                            'Professional Degree',
+                            'Other',
+                          ]
+                          .map(
+                            (l) => DropdownMenuItem(value: l, child: Text(l)),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    setDialogState(() {
+                      educationLevel = value ?? 'Bachelor\'s Degree';
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: degreeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Degree/Qualification',
+                    hintText: 'e.g., BSc Computer Science',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: institutionController,
+                  decoration: const InputDecoration(labelText: 'Institution'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: fieldController,
+                  decoration: const InputDecoration(
+                    labelText: 'Field of Study (Optional)',
+                    hintText: 'e.g., Computer Science',
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: institutionController,
-              decoration: const InputDecoration(labelText: 'Institution'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: fieldController,
-              decoration: const InputDecoration(labelText: 'Field of Study'),
+            TextButton(
+              onPressed: () {
+                if (degreeController.text.isNotEmpty &&
+                    institutionController.text.isNotEmpty) {
+                  Navigator.pop(context);
+                  setState(() {
+                    _education.add(
+                      Education(
+                        id: _uuid.v4(),
+                        degree: '$educationLevel - ${degreeController.text}',
+                        institution: institutionController.text,
+                        fieldOfStudy: fieldController.text,
+                        startDate: DateTime.now(),
+                        endDate: DateTime.now(),
+                      ),
+                    );
+                  });
+                }
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (degreeController.text.isNotEmpty &&
-                  institutionController.text.isNotEmpty) {
-                setState(() {
-                  _education.add(
-                    Education(
-                      id: _uuid.v4(),
-                      degree: degreeController.text,
-                      institution: institutionController.text,
-                      fieldOfStudy: fieldController.text,
-                      startDate: DateTime.now(),
-                      endDate: DateTime.now(),
-                    ),
-                  );
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
