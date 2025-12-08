@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410337708306",
+    "project_id": "bs-resume-creator",
+    "storage_bucket": "bs-resume-creator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410337708306:android:55b91e98fdbcf62b6c8bcb",
+        "android_client_info": {
+          "package_name": "zw.co.malvernbright.resume_creator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4SBnC_vMfHMtglz9Xc5A5YgXawHOzrGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
