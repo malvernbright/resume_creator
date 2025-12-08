@@ -6,9 +6,12 @@ import 'package:intl/intl.dart';
 
 class WordExportService {
   Future<File> generateResumeWord(Resume resume) async {
-    // Create a new Word document
+    // Create a new Excel workbook (can be opened in Word/Excel/Sheets)
     final xlsio.Workbook workbook = xlsio.Workbook();
     final xlsio.Worksheet sheet = workbook.worksheets[0];
+
+    // Set column width for better formatting
+    sheet.getRangeByIndex(1, 1, 1, 3).columnWidth = 30;
 
     int currentRow = 1;
 
@@ -50,15 +53,16 @@ class WordExportService {
       currentRow++;
     }
 
-    currentRow += 2;
+    currentRow++;
 
-    // Summary
+    // Professional Summary
     if (resume.summary.isNotEmpty) {
-      sheet.getRangeByIndex(currentRow, 1).setText('SUMMARY');
+      sheet.getRangeByIndex(currentRow, 1).setText('PROFESSIONAL SUMMARY');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 14;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       currentRow++;
       sheet.getRangeByIndex(currentRow, 1).setText(resume.summary);
+      sheet.getRangeByIndex(currentRow, 1).cellStyle.wrapText = true;
       currentRow += 2;
     }
 
@@ -82,6 +86,7 @@ class WordExportService {
         currentRow++;
 
         sheet.getRangeByIndex(currentRow, 1).setText(exp.description);
+        sheet.getRangeByIndex(currentRow, 1).cellStyle.wrapText = true;
         currentRow += 2;
       }
     }
@@ -123,6 +128,7 @@ class WordExportService {
           .map((s) => '${s.name} (${s.level})')
           .join(', ');
       sheet.getRangeByIndex(currentRow, 1).setText(skillsText);
+      sheet.getRangeByIndex(currentRow, 1).cellStyle.wrapText = true;
       currentRow += 2;
     }
 
@@ -133,28 +139,53 @@ class WordExportService {
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       currentRow++;
 
-      for (var proj in resume.projects) {
-        sheet.getRangeByIndex(currentRow, 1).setText(proj.name);
+      for (var project in resume.projects) {
+        sheet.getRangeByIndex(currentRow, 1).setText(project.name);
         sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
         currentRow++;
 
-        sheet.getRangeByIndex(currentRow, 1).setText(proj.description);
+        sheet.getRangeByIndex(currentRow, 1).setText(project.description);
+        sheet.getRangeByIndex(currentRow, 1).cellStyle.wrapText = true;
         currentRow++;
 
-        if (proj.technologies.isNotEmpty) {
+        if (project.technologies.isNotEmpty) {
           sheet
               .getRangeByIndex(currentRow, 1)
-              .setText('Technologies: ${proj.technologies.join(', ')}');
+              .setText('Technologies: ${project.technologies.join(', ')}');
           currentRow++;
         }
         currentRow++;
       }
     }
 
+    // References
+    if (resume.references.isNotEmpty) {
+      sheet.getRangeByIndex(currentRow, 1).setText('REFERENCES');
+      sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 14;
+      sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
+      currentRow++;
+
+      for (var reference in resume.references) {
+        sheet.getRangeByIndex(currentRow, 1).setText(reference.name);
+        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
+        currentRow++;
+
+        sheet
+            .getRangeByIndex(currentRow, 1)
+            .setText('${reference.position} at ${reference.company}');
+        currentRow++;
+
+        sheet
+            .getRangeByIndex(currentRow, 1)
+            .setText('Email: ${reference.email} | Phone: ${reference.phone}');
+        currentRow += 2;
+      }
+    }
+
     // Auto-fit columns
     sheet.autoFitColumn(1);
 
-    // Save the document
+    // Save as Excel file (opens in Excel/Sheets/Numbers)
     final List<int> bytes = workbook.saveAsStream();
     workbook.dispose();
 

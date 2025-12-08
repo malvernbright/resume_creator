@@ -204,27 +204,36 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Choose Template *',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Choose Template *',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _showTemplatePreview(context),
+                          icon: const Icon(Icons.preview, size: 18),
+                          label: const Text('Preview'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: ResumeTemplate.values.map((template) {
-                        final isSelected = _selectedTemplate == template;
-                        return GestureDetector(
+                    ...ResumeTemplate.values.map((template) {
+                      final isSelected = _selectedTemplate == template;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: InkWell(
                           onTap: () {
                             setState(() {
                               _selectedTemplate = template;
                             });
                           },
+                          borderRadius: BorderRadius.circular(8),
                           child: Container(
-                            width: (MediaQuery.of(context).size.width - 80) / 2,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isSelected
@@ -240,31 +249,30 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                            child: Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      isSelected
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: isSelected
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.primary
-                                          : Colors.grey,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
+                                Icon(
+                                  isSelected
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_unchecked,
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.grey,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
                                         template.displayName,
                                         style: TextStyle(
                                           fontWeight: isSelected
                                               ? FontWeight.bold
-                                              : FontWeight.w500,
+                                              : FontWeight.w600,
+                                          fontSize: 16,
                                           color: isSelected
                                               ? Theme.of(
                                                   context,
@@ -272,23 +280,23 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                                               : Colors.black87,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  template.description,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        template.description,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
+                        ),
+                      );
+                    }).toList(),
                   ],
                 ),
               ),
@@ -420,6 +428,15 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                 onAdd: () => _showAddSkillDialog(),
               ),
 
+              const SizedBox(height: 24),
+
+              _buildListSection(
+                title: 'References (Optional)',
+                items: _references,
+                emptyMessage: 'No references added yet',
+                onAdd: () => _showAddReferenceDialog(),
+              ),
+
               const SizedBox(height: 32),
 
               ElevatedButton.icon(
@@ -504,6 +521,8 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                         _education.removeAt(index);
                       else if (item is Skill)
                         _skills.removeAt(index);
+                      else if (item is Reference)
+                        _references.removeAt(index);
                     });
                   },
                 ),
@@ -518,6 +537,7 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
     if (item is Experience) return item.position;
     if (item is Education) return item.degree;
     if (item is Skill) return item.name;
+    if (item is Reference) return item.name;
     return '';
   }
 
@@ -525,7 +545,326 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
     if (item is Experience) return item.company;
     if (item is Education) return item.institution;
     if (item is Skill) return item.level;
+    if (item is Reference) return '${item.position} at ${item.company}';
     return '';
+  }
+
+  void _showTemplatePreview(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+          child: Column(
+            children: [
+              AppBar(
+                title: const Text('Template Previews'),
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: ResumeTemplate.values.map((template) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.description,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  template.displayName,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  template.description,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                _buildTemplatePreview(template),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _selectedTemplate = template;
+                                      });
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Template changed to ${template.displayName}',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Use This Template'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTemplatePreview(ResumeTemplate template) {
+    switch (template) {
+      case ResumeTemplate.classic:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'John Doe',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              const Text('📧 Email | 📞 Phone', style: TextStyle(fontSize: 10)),
+              const SizedBox(height: 8),
+              Text(
+                'EXPERIENCE',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const Text(
+                '• Job Title - Company',
+                style: TextStyle(fontSize: 9),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'EDUCATION',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const Text(
+                '• Degree - University',
+                style: TextStyle(fontSize: 9),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'SKILLS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const Text(
+                '• Skill 1 • Skill 2 • Skill 3',
+                style: TextStyle(fontSize: 9),
+              ),
+            ],
+          ),
+        );
+      case ResumeTemplate.modern:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blue[300]!),
+            borderRadius: BorderRadius.circular(4),
+            gradient: LinearGradient(
+              colors: [Colors.blue[50]!, Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.blue[700],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: const Text(
+                  'John Doe',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(width: 3, height: 40, color: Colors.blue[700]),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Job Title',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('Company Name', style: TextStyle(fontSize: 9)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      case ResumeTemplate.professional:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[400]!),
+            borderRadius: BorderRadius.circular(4),
+            color: Colors.grey[50],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'JOHN DOE',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      Text('Professional Title', style: TextStyle(fontSize: 9)),
+                    ],
+                  ),
+                ],
+              ),
+              const Divider(thickness: 2),
+              const Text(
+                'PROFESSIONAL EXPERIENCE',
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                'Senior Role | 2020-Present',
+                style: TextStyle(fontSize: 8),
+              ),
+            ],
+          ),
+        );
+      case ResumeTemplate.minimalist:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[200]!),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'JOHN DOE',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: 3,
+                ),
+              ),
+              const Text('john@email.com', style: TextStyle(fontSize: 9)),
+              const SizedBox(height: 8),
+              Container(height: 1, color: Colors.grey[300]),
+              const SizedBox(height: 8),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Experience', style: TextStyle(fontSize: 10)),
+                    Text(
+                      'Job Title',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+    }
   }
 
   void _showAddExperienceDialog() {
@@ -759,6 +1098,86 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showAddReferenceDialog() {
+    final nameController = TextEditingController();
+    final positionController = TextEditingController();
+    final companyController = TextEditingController();
+    final emailController = TextEditingController();
+    final phoneController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Reference'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Full Name *'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: positionController,
+                decoration: const InputDecoration(
+                  labelText: 'Position/Title *',
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: companyController,
+                decoration: const InputDecoration(labelText: 'Company *'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email *'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Phone *'),
+                keyboardType: TextInputType.phone,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty &&
+                  positionController.text.isNotEmpty &&
+                  companyController.text.isNotEmpty &&
+                  emailController.text.isNotEmpty &&
+                  phoneController.text.isNotEmpty) {
+                Navigator.pop(context);
+                setState(() {
+                  _references.add(
+                    Reference(
+                      id: _uuid.v4(),
+                      name: nameController.text,
+                      position: positionController.text,
+                      company: companyController.text,
+                      email: emailController.text,
+                      phone: phoneController.text,
+                    ),
+                  );
+                });
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }
