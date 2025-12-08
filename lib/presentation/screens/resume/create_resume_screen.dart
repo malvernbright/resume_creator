@@ -515,14 +515,15 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
                   icon: const Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
-                      if (item is Experience)
+                      if (item is Experience) {
                         _experiences.removeAt(index);
-                      else if (item is Education)
+                      } else if (item is Education) {
                         _education.removeAt(index);
-                      else if (item is Skill)
+                      } else if (item is Skill) {
                         _skills.removeAt(index);
-                      else if (item is Reference)
+                      } else if (item is Reference) {
                         _references.removeAt(index);
+                      }
                     });
                   },
                 ),
