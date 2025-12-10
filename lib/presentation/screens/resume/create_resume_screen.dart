@@ -1046,6 +1046,7 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
 
   void _showAddSkillDialog() {
     final nameController = TextEditingController();
+    final categoryController = TextEditingController();
     String level = 'Intermediate';
 
     showDialog(
@@ -1053,27 +1054,40 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Add Skill'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Skill Name'),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: level,
-                decoration: const InputDecoration(labelText: 'Level'),
-                items: ['Beginner', 'Intermediate', 'Advanced', 'Expert']
-                    .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                    .toList(),
-                onChanged: (value) {
-                  setDialogState(() {
-                    level = value ?? 'Intermediate';
-                  });
-                },
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Skill Name',
+                    hintText: 'e.g., Python, Flutter, Project Management',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: categoryController,
+                  decoration: const InputDecoration(
+                    labelText: 'Category (Optional)',
+                    hintText: 'e.g., Software Development, Project Management',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: level,
+                  decoration: const InputDecoration(labelText: 'Level'),
+                  items: ['Beginner', 'Intermediate', 'Advanced', 'Expert']
+                      .map((l) => DropdownMenuItem(value: l, child: Text(l)))
+                      .toList(),
+                  onChanged: (value) {
+                    setDialogState(() {
+                      level = value ?? 'Intermediate';
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -1083,16 +1097,19 @@ class _CreateResumeScreenState extends State<CreateResumeScreen> {
             TextButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty) {
+                  Navigator.pop(context);
                   setState(() {
                     _skills.add(
                       Skill(
                         id: _uuid.v4(),
                         name: nameController.text,
                         level: level,
+                        category: categoryController.text.isNotEmpty 
+                            ? categoryController.text 
+                            : null,
                       ),
                     );
                   });
-                  Navigator.pop(context);
                 }
               },
               child: const Text('Add'),
