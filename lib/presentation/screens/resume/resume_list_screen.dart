@@ -167,21 +167,22 @@ class ResumeListScreen extends StatelessWidget {
   }
 
   void _handleEdit(BuildContext context, Resume resume) {
+    // Capture bloc references before navigation
+    final resumeBloc = context.read<ResumeBloc>();
+    final authBloc = context.read<AuthBloc>();
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.read<ResumeBloc>(),
+          value: resumeBloc,
           child: CreateResumeScreen(resume: resume),
         ),
       ),
     ).then((_) {
-      // Reload resumes after editing
-      final authBloc = context.read<AuthBloc>();
+      // Reload resumes after editing using captured references
       if (authBloc.state is Authenticated) {
-        context.read<ResumeBloc>().add(
-          LoadResumes((authBloc.state as Authenticated).user.id),
-        );
+        resumeBloc.add(LoadResumes((authBloc.state as Authenticated).user.id));
       }
     });
   }
